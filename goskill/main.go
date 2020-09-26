@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"math"
+	"strconv"
 )
 
 /* 
@@ -16,7 +17,8 @@ func main() {
 	// sortFunc()
 	// mathFunc()
 	// copyFunc()
-	makeFunc() 
+	// makeFunc() 
+	typeConversion()
 }
 
 // 栈
@@ -299,4 +301,38 @@ func makeFunc() {
 	s = append(s, 2)
 	// [1 2]
 	fmt.Println(s)
+}
+
+// 常用类型转换技巧
+func typeConversion() {
+	s := "12345"
+
+	// byte 转数字，s[0] 是byte类型
+	num := int(s[0] - '0')	// 1
+	fmt.Printf("num类型：%T，num值：%v\n", num, num)
+
+	// int 转 byte
+	b := byte(num + '0')	// '1'
+	fmt.Printf("b类型：%T，b值：%c\n", b, b)
+
+	// byte 转 string
+	str := string(s[0])		// "1"
+	fmt.Printf("str类型：%T，str值：%v\n", str, str)
+
+	// 字符串转数字
+	ints, _ := strconv.Atoi(s)
+	fmt.Printf("ints类型：%T， ints值：%v\n", ints, ints)
+
+	// 数字转字符串
+	strs := strconv.Itoa(ints)
+	fmt.Printf("strs类型：%T，strs值：%v\n", strs, strs)
+
+	/* 
+		输出结果：
+			num类型：int，num值：1
+			b类型：uint8，b值：1
+			str类型：string，str值：1
+			ints类型：int， ints值：12345
+			strs类型：string，strs值：12345
+	*/
 }
