@@ -979,18 +979,20 @@ func twoSum(numbers []int, target int) []int {
 	return []int{}
 }
 func binarySearch(numbers []int, L, R, target int) int {
-	for L <= R {
-		mid := (L + R)>>1
-		if numbers[mid] == target {
-			return mid
-		}
-		if numbers[mid] > target {
-			// 左闭右开
-			R = mid - 1
+	for L + 1 < R {
+		mid := (L + R) >> 1
+		if numbers[mid] < target {
+			L = mid
 		} else {
-			L = mid + 1
+			R = mid
 		}
 	}
+    if numbers[L] == target {
+        return L
+    }
+    if numbers[R] == target {
+        return R
+    }
 	return -1
 }
 
@@ -1706,9 +1708,9 @@ func arrayPairSumTest() {
 
 // 9、测试两数之和 II - 输入有序数组
 func twoSumTest() {
-	nums := []int{2,7,11,15}
-	// res := twoSum(nums, 6)
-	res := twoSum2(nums, 9)
+	nums := []int{5,25,75}
+	res := twoSum(nums, 100)
+	// res := twoSum2(nums, 100)
 	fmt.Println(res)
 }
 
@@ -1779,11 +1781,11 @@ func main() {
 	// setZeroesTest()
 	// longestCommonPrefixTest()
 	// longestPalindromeTest()
-	reverseWordTest()
+	// reverseWordTest()
 	// strStrTest()
 	// reverseStringTest()
 	// arrayPairSumTest()
-	// twoSumTest()
+	twoSumTest()
 	// removeElementTest()
 	// findMaxConsecutiveOnesTest()
 	// minSubArrayLenTest()
