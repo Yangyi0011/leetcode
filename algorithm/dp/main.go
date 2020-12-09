@@ -1362,10 +1362,135 @@ func palindromeInit(s string, dp [][]bool) {
 	}
 }
 
+/* 
+================== 10、最长上升子序列 ==================
+给定一个无序的整数数组，找到其中最长上升子序列的长度。
 
+示例:
+输入: [10,9,2,5,3,7,101,18]
+输出: 4 
+解释: 最长的上升子序列是 [2,3,7,101]，它的长度是 4。
 
+说明:
+    可能会有多种最长上升子序列的组合，你只需要输出对应的长度即可。
+    你算法的时间复杂度应该为 O(n2) 。
 
+进阶: 你能将算法的时间复杂度降低到 O(nlogn) 吗?
 
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-increasing-subsequence
+*/
+/* 
+	方法一：初始DP
+	思路：
+		以 dp[i] 表示从0开始到i结尾的最长序列长度。
+		初始状态：
+			dp[0] = 0
+		中间状态：
+			dp[i] = max(dp[j]) + 1, a[j] < a[i]
+			dp[i] 的最小值是1。
+		终止状态：
+			dp[n-1]
+		结果：
+			从 dp[0] ~ dp[n-1] 中找出最大值
+		时间复杂度：O(n^2)
+			n 表示数据元素的个数
+		空间复杂度：O(n)
+			每一个状态都依赖于前面的所有状态，所以不能优化。
+*/
+func lengthOfLIS(nums []int) int {
+	n := len(nums)
+    if n == 0 || n == 1 {
+        return n
+    }
+    dp := make([]int, n)
+	dp[0] = 1
+	ans := dp[0]
+    for i := 1; i < len(nums); i++ {
+        dp[i] = 1
+        for j := 0; j < i; j++ {
+            if nums[j] < nums[i] {
+                dp[i] = max(dp[i], dp[j] + 1)
+            }
+		}
+		ans = max(ans, dp[i])
+    }
+    return ans
+}
+
+/* 
+	方法二：动态规划 + 二分查找
+	
+*/
+
+/* 
+================== 11、最长【连续】上升子序列 ==================
+给定一个无序的整数数组，找到其中最长连续上升子序列的长度。
+
+示例:
+输入: [10,9,2,5,3,7,101,18]
+输出: 3 
+解释: 最长的连续上升子序列是 [3,7,101]，它的长度是 3。
+
+说明:
+    可能会有多种最长上升子序列的组合，你只需要输出对应的长度即可。
+    你算法的时间复杂度应该为 O(n2) 。
+
+进阶: 你能将算法的时间复杂度降低到 O(n log n) 吗?
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-increasing-subsequence
+*/
+/* 
+	方法一：初始DP
+	思路：
+		使用 dp[i][j] 来表示 nums[i:j] 是不是连续上升序列。
+		初始状态：
+			只有一个元素时是连续上升序列，即：
+				dp[i][j] = true, i == j
+			有两个元素时，只要 nums[i] <= nums[j] 就是连续上升序列，即：
+				dp[i][j] = (nums[i] <= nums[j]), j - i == 1
+		中间状态：
+			对于 nums[i:j] 是不是连续上升序列，只需要
+			（nums[i] < nums[i+1] 且 nums[i+1:j] 是连续上升序列) 或 (nums[j] > nums[j-1] && nums[i:j-1] 是上升序列) 
+			即：
+				dp[i][j] = (nums[i] <= num[i+1] && dp[i+1][j]) || (dp[i][j-1] && nums[j] >= nums[j-1]),  0 < i < j < n
+		终止状态：
+			j == n - 1
+		结果：
+			找出 j-i 的最大值
+		时间复杂度：O(n^2)
+			n 表示数组元素的个数。
+		空间复杂度：O(n^2)
+*/
+func lengthOfLIS2(nums []int) int {
+	n := len(nums)
+	dp := make([][]bool, n)
+	for i := 0; i < n; i ++ {
+		dp[i] = make([]bool, n)
+	}
+	ans := 0
+	// sl 表示最长连续上升子序列的长度，0 表示只有一个元素
+	for sl := 0; sl < n; sl ++ {
+		for i := 0; i + sl < n; i ++ {
+			j := i + sl
+			if j - i == 0 {
+				dp[i][j] = true
+			} else if j - i == 1 && nums[i] <= nums[j] {
+				dp[i][j] = true
+			} else {
+				if (nums[i] <= nums[i+1] && dp[i+1][j]) || (nums[j] >= nums[j-1] && dp[i][j-1]) {
+					dp[i][j] = true
+				}
+			}
+			if dp[i][j] && sl > ans {
+				ans = sl
+			}
+		}
+	}
+	// sl 是从 0 开始的，最后要 + 1
+	return ans + 1
+}
 
 
 
@@ -1442,6 +1567,20 @@ func minCutTest() {
 	fmt.Println(res)
 }
 
+// 10、测试最长上升子序列
+func lengthOfLISTest() {
+	nums := []int{10,9,2,5,3,7,101,18}
+	res := lengthOfLIS(nums)
+	fmt.Println(res)
+}
+
+// 11、测试最长连续上升子序列
+func lengthOfLIS2Test() {
+	nums := []int{10,9,2,5,3,7,101,18}
+	res := lengthOfLIS2(nums)
+	fmt.Println(res)
+}
+
 func main() {
 	// longestConsecutiveTest()
 	// minPathSumTest()
@@ -1450,5 +1589,7 @@ func main() {
 	// climbStairsTest()
 	// canJumpTest()
 	// jumpTest()
-	minCutTest()
+	// minCutTest()
+	// lengthOfLISTest()
+	lengthOfLIS2Test()
 }
