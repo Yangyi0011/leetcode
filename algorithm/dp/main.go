@@ -12,7 +12,7 @@ import (
 			Funciton(x-1);
 			...
 		}
-	动态规划：是一种解决问 题的思想，大规模问题的结果，是由小规模问 题的结果运算得来的。动态规划可用递归来实现(Memorization Search)
+	动态规划：是一种解决问题的思想，大规模问题的结果，是由小规模问题的结果运算得来的。动态规划可用递归来实现(Memorization Search)
 
 使用场景
 	满足两个条件
@@ -299,7 +299,7 @@ func minimumTotal6(triangle [][]int) int {
 /* 	
 	算法：常规DP + 空间优化
 	思路：
-		在题目描述中的「说明」部分，提到了可以将空间复杂度优化至 O(n)O(n)O(n)。
+		在题目描述中的「说明」部分，提到了可以将空间复杂度优化至 O(n)。
 		我们回顾方法一中的状态转移方程：
 					   f[i−1][0]+c[i][0],						j=0
 			f[i][j]= / f[i−1][i−1]+c[i][i],						j=i
@@ -495,6 +495,7 @@ func longestConsecutive(nums []int) int {
 		综上所述，我们得到状态转移方程如下：
 					  / grid[i][j], i=0, j=0
 			dp[i][j] /  dp[i][j-1] + grid[i][j], i=0,j∈[1,n)
+						dp[i-1][j] + grid[i][j], i∈[1,m), j=0
 					 \	min(dp[i][j-1],dp[i-1][j]) + grid[i][j], i∈[1,m), j∈[1,n)
 	时间复杂度：O(m*n)
 	空间复杂度：O(m*n)
@@ -661,6 +662,7 @@ func minPathSum3(grid [][]int) int {
 		综上所述，我们得到状态转移方程如下：
 					  / 1, i=0, j=0
 			dp[i][j] /  dp[i][j-1], i=0,j∈[1,n)
+						dp[i-1][j], i∈[1,n),j=0
 					 \	dp[i][j-1] + dp[i-1][j], i∈[1,m), j∈[1,n)
 	时间复杂度：O(m*n)
 	空间复杂度：O(m*n)
@@ -960,12 +962,12 @@ func uniquePathsWithObstacles2(obstacleGrid [][]int) int {
 /* 
 	方法一：初始DP
 	思路：
-		我们用一个长度为 n 的数组来记录状态装一过程。
+		我们用一个长度为 n 的数组来记录状态转移过程。
 		初始状态：
 			刚开始我们是在楼梯前的，还没上楼梯，此时只有一种状态，即
 				dp[0] = 1
 		中间状态：
-			对于每一个位置 i，它只能同走一步 i-1 或是走两步 i-2 来到达，故有：
+			对于每一个位置 i，它只能从走一步 i-1 或是走两步 i-2 来到达，故有：
 				dp[i] = dp[i-1] + dp[i-2]
 		边界条件：
 			当只有 i = 1 时，我们只有走一步这种一种走法，故有：
@@ -1044,8 +1046,8 @@ func climbStairs2(n int) int {
 /* 
 	方法一：寻找能跳到的最远位置（贪心算法）
 	思路：
-		设想一下，对于数组中的任意一个位置 yyy，我们如何判断它是否可以到达？
-		根据题目的描述，只要存在一个位置 xxx，它本身可以到达，并且它跳跃的
+		设想一下，对于数组中的任意一个位置 y，我们如何判断它是否可以到达？
+		根据题目的描述，只要存在一个位置 x，它本身可以到达，并且它跳跃的
 		最大长度为 x+nums[x]，这个值大于等于 y，即 x+nums[x]≥y，那么位置 y 
 		也可以到达。
 		换句话说，对于每一个可以到达的位置 x，它使得 x+1,x+2,⋯ ,x+nums[x] 
@@ -1492,7 +1494,388 @@ func lengthOfLIS2(nums []int) int {
 	return ans + 1
 }
 
+/* 
+================== 12、单词拆分 ==================
+给定一个非空字符串 s 和一个包含非空单词的列表 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。
+说明：
+    拆分时可以重复使用字典中的单词。
+    你可以假设字典中没有重复的单词。
 
+示例 1：
+输入: s = "leetcode", wordDict = ["leet", "code"]
+输出: true
+解释: 返回 true 因为 "leetcode" 可以被拆分成 "leet code"。
+
+示例 2：
+输入: s = "applepenapple", wordDict = ["apple", "pen"]
+输出: true
+解释: 返回 true 因为 "applepenapple" 可以被拆分成 "apple pen apple"。
+     注意你可以重复使用字典中的单词。
+
+示例 3：
+输入: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+输出: false
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/word-break
+*/
+/* 
+	方法一：动态规划
+	思路：
+		我们用 dp[i] 来表示前 i 个字符是否可以被拆分成字典中的单词，即 
+			s[0..i−1] 是否能被空格拆分成若干个字典中出现的单词。
+		初始状态：
+			添加一个标记位：dp[0] = true，表示空串且合法。
+		中间状态：
+			dp[i] = d[j] && s[j,i] 是字典中的单词
+		终止状态：
+			因为我们添加了一个标记位，所以终止状态在 dp[n] 中
+	时间复杂度：O(n^2)
+		n 表示字符串的长度
+	空间复杂度：O(n^2)
+*/
+func wordBreak(s string, wordDict []string) bool {
+	n := len(s)
+	if n == 0 {
+		return false
+	}
+	// 使用 hash 表来缩短查找是不是字典中的单词的时间
+	wordDictSet := make(map[string]bool, len(wordDict))
+	for _, word := range wordDict {
+		wordDictSet[word] = true
+	}
+	dp := make([]bool, n + 1)
+	dp[0] = true
+	for i := 1; i <= n; i ++ {
+		for j := 0; j < i; j ++ {
+			// 从 0 开始，即从字符最长的单词开始查找，找到一个符合条件就行
+			if dp[j] && wordDictSet[s[j:i]] {
+				dp[i] = true
+				break
+			}
+		}
+	}
+	return dp[n]
+}
+
+/* 
+================== 13、最长公共子序列 ==================
+给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。
+一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的
+相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
+两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。
+若这两个字符串没有公共子序列，则返回 0。
+
+示例 1:
+输入：text1 = "abcde", text2 = "ace" 
+输出：3  
+解释：最长公共子序列是 "ace"，它的长度为 3。
+
+示例 2:
+输入：text1 = "abc", text2 = "abc"
+输出：3
+解释：最长公共子序列是 "abc"，它的长度为 3。
+
+示例 3:
+输入：text1 = "abc", text2 = "def"
+输出：0
+解释：两个字符串没有公共子序列，返回 0。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-common-subsequence
+*/
+/* 
+    方法一：初始DP
+    思路：
+        我们可以基于两个字符串 s1 和 s2 来构建一个 dp 二维表，dp[i][j]表示
+        s1 与 s2 的最长公共子序列长度（LCS），以 s1 = "ace", text2 = "abcde" 举例，
+        表如下：
+            s1\s2    0    1    2    3    4    5
+                    ''    a    b    c    d    e
+            0    ''    0    0    0    0    0    0
+            1    a    0    1    1    1    1    1
+            2    c    0    1    1    2    2    2
+            3    e    0    1    1    2    2    3
+        注：空串与任何字符串的最长公共子序列的长度都为0
+        初始状态：
+            两个空串的 LSC 为 0，即：
+                dp[0][0] = 0
+        中间状态：
+            用两个指针遍历两个字符串，如果有 s1[i-1] == s2[j-1]，
+            （-1 是因为 dp 记录了空串，所以 dp 的 i、j 对于字符串来说是大一位的）
+            即意味着当前字符在 LCS 中，则：
+                dp[i][j] = dp[i-1][j-1] + 1
+            否则我们可以从：
+                1、s1[i] 不在 LCS 中
+                2、s2[j] 不在 LCS 中
+                3、s1[i]、s2[j] 都不在 LCS 中
+            这三种情况中找出最长的 LCS，但因为 情况3 无论如何都会小于 情况1 与 情况2,
+            所以可以简写为：
+                dp[i][j] = max(d[i-1][j], dp[i][j-1])
+        终止状态：
+            因为加入了空串，所以 LCS 在 dp[len(s1)][len(s2)] 中
+    时间复杂度：O(m*n)
+        m、n 分别表示字符串 s1、s2 的长度。
+    空间复杂度：O(m*n)
+        我们需要构建一个 m*n 的二维状态表。
+*/
+func longestCommonSubsequence(text1 string, text2 string) int {
+    m, n := len(text1), len(text2)
+    if m == 0 || n == 0 {
+        return 0
+    }
+    // 因为加入了空串，所以长度 + 1
+    dp := make([][]int, m + 1)
+    for i := 0; i <= m; i ++ {
+        dp[i] = make([]int, n + 1)
+    }
+	dp[0][0] = 0
+	// 空串与任何字符串的 LCS 都是 0，即 dp[0][j] = 0, dp[i][0] = 0
+	// 所以直接从 1 开始
+    for i := 1; i <= m; i ++ {
+        for j := 1; j <= n; j ++ {
+            // -1 是因为 dp 记录了空串，所以 dp 的 i、j 对于字符串来说是大一位的
+            if text1[i-1] == text2[j-1] {
+                dp[i][j] = dp[i-1][j-1] + 1
+            } else {
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+            }
+        }
+    }
+    return dp[m][n]
+}
+/* 
+    方法二：DP + 空间优化
+    思路：
+        从方法一中我们可以看出，对于每一个状态 dp[i][j]，它只与 dp[i-1][j-1]、
+        dp[i-1][j]、dp[i][j-1] 这三个前置状态有关，所以我们完全可以只用两个
+        长度为 n + 1 的数组来完成整个状态转移过程，再借助于奇偶性来确定每一次该更新
+        哪一个数组的状态就行了。
+    时间复杂度：O(m*n)
+        m、n 分别表示字符串 s1、s2 的长度。
+    空间复杂度：O(2n)
+        我们需要构建两个长度为 n + 1 的数组来完成状态转移。
+    思考：
+        能不能优化到 O(n) 呢？
+        因为 dp[i][j] 与 dp[i-1][j-1]、dp[i-1][j]、dp[i][j-1]，如果我们只用一个
+        数组来记录状态转移，那么 dp[i][j] 对应的就是 dp[j]，按 dp[i-1][j-1]、
+        dp[i-1][j]、dp[i][j-1] 三个状态在 dp[j] 上的投影，就是 dp[j-1]、dp[j]、dp[j-1]，
+        可以看出在修改 dp[j-1] 时会导致两个状态同时被影响，由此会影响到整个状态转移过程，
+        所以不能优化到 O(n)。
+*/
+func longestCommonSubsequence2(text1 string, text2 string) int {
+    m, n := len(text1), len(text2)
+    if m == 0 || n == 0 {
+        return 0
+    }
+    dp := make([][]int, 2)
+    for i := 0; i < 2; i ++ {
+        dp[i] = make([]int, n + 1)
+	}
+	cur, pre := 0, 0
+	dp[0][0] = 0
+	// 空串与任何字符串的 LCS 都是 0，即 dp[0][j] = 0, dp[i][0] = 0
+	// 所以直接从 1 开始
+    for i := 1; i <= m; i ++ {
+        cur = i & 1    // 同 i % 2
+        pre = 1 - cur
+        for j := 1; j <= n; j ++ {
+            // -1 是因为 dp 记录了空串，所以 dp 的 i、j 对于字符串来说是大一位的
+            if text1[i-1] == text2[j-1] {
+                dp[cur][j] = dp[pre][j-1] + 1
+            } else {
+                dp[cur][j] = max(dp[pre][j], dp[cur][j-1])
+            }
+        }
+    }
+    return dp[cur][n]
+}
+
+/* 
+================== 14、编辑距离 ==================
+给你两个单词 word1 和 word2，请你计算出将 word1 转换成 word2 所使用的最少操作数 。
+你可以对一个单词进行如下三种操作：
+    插入一个字符
+    删除一个字符
+    替换一个字符
+
+示例 1：
+输入：word1 = "horse", word2 = "ros"
+输出：3
+解释：
+horse -> rorse (将 'h' 替换为 'r')
+rorse -> rose (删除 'r')
+rose -> ros (删除 'e')
+
+示例 2：
+输入：word1 = "intention", word2 = "execution"
+输出：5
+解释：
+intention -> inention (删除 't')
+inention -> enention (将 'i' 替换为 'e')
+enention -> exention (将 'n' 替换为 'x')
+exention -> exection (将 'n' 替换为 'c')
+exection -> execution (插入 'u')
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/edit-distance
+*/
+/* 
+	方法一：初始DP
+	思路：
+		我们可以对任意一个单词进行三种操作：
+			插入一个字符；
+			删除一个字符；
+			替换一个字符。
+		题目给定了两个单词，设为 A 和 B，这样我们就能够六种操作方法。
+		但我们可以发现，如果我们有单词 A 和单词 B：
+			对单词 A 删除一个字符和对单词 B 插入一个字符是等价的。例如当
+			单词 A 为 doge，单词 B 为 dog 时，我们既可以删除单词 A 的最
+			后一个字符 e，得到相同的 dog，也可以在单词 B 末尾添加一个字符 e，
+			得到相同的 doge；
+			同理，对单词 B 删除一个字符和对单词 A 插入一个字符也是等价的；
+			对单词 A 替换一个字符和对单词 B 替换一个字符是等价的。例如当单
+			词 A 为 bat，单词 B 为 cat 时，我们修改单词 A 的第一个字母 
+			b -> c，和修改单词 B 的第一个字母 c -> b 是等价的。
+		这样以来，本质不同的操作实际上只有三种：
+			在单词 A 中插入一个字符；
+			在单词 B 中插入一个字符；
+			修改单词 A 的一个字符。
+		这样以来，我们就可以把原问题转化为规模较小的子问题。我们用 A = horse，
+		B = ros 作为例子，来看一看是如何把这个问题转化为规模较小的若干子问题的。
+			在单词 A 中插入一个字符：如果我们知道 horse 到 ro 的编辑距离为 a，
+			那么显然 horse 到 ros 的编辑距离不会超过 a + 1。这是因为我们可以
+			在 a 次操作后将 horse 和 ro 变为相同的字符串，只需要额外的 1 次操作，
+			在单词 A 的末尾添加字符 s，就能在 a + 1 次操作后将 horse 和 ro 变为
+			相同的字符串；
+			在单词 B 中插入一个字符：如果我们知道 hors 到 ros 的编辑距离为 b，
+			那么显然 horse 到 ros 的编辑距离不会超过 b + 1，原因同上；
+			修改单词 A 的一个字符：如果我们知道 hors 到 ro 的编辑距离为 c，
+			那么显然 horse 到 ros 的编辑距离不会超过 c + 1，原因同上。
+		那么从 horse 变成 ros 的编辑距离应该为 min(a + 1, b + 1, c + 1)。
+
+		故本题与【最长公共子序列】的题目类似，
+		以 dp[i][j] 表示字符串 s1 的前 i 个字符编辑为 s2 前 j 个字符所需的
+		最少操作次数。我们用 s1、s2 组成一个 dp 状态表。
+		表如下：
+			s1\s2	0	1	2	3
+					''	r	o	s
+			0	''	0	1	2	3
+			1	h	1	1	2	3
+			2	o	2	2	1	2
+			3	r	3	2	2	2
+			4	s	4	3	3	2
+			5	e	5	4	4	3
+		解析：
+			1、往右:
+				表示 s2 比 s1 多了一个字符，此时要想s1、s2相同，则需要的操作是从 s2 中
+				删除一个字符，或者是在 s1 中添加一个字符，其编辑距离为 1
+			2、往下：
+				表示在 s1 比 s2 多了一个字符，此时要想s1、s2相同，则需要的操作是从 s1 中
+				删除一个字符，或者是在 s2 中添加一个字符，其编辑距离为 1
+			3、往右下：
+				表示在s1、s2字符数相同，但最后一个字符可能不一样， 此时要想s1、s2相同，则
+				需要替换 s1 或者 s2 的最后一个字符使它们相同，即修改，其编辑距离为 1
+		初始状态：
+			我们记录空串，空串与空串相等，所以不需要编辑，即：
+				dp[0][0] = 0
+			空串与任何字符串对比所需的编辑次数是该字符串字符的个数，即：
+				dp[0][j] = j
+				dp[i][0] = i
+		中间状态：
+			对于 dp[i][j] 来说，
+			如果 s1[i-1] == s2[j-1]（此处之所以 -1 是因为dp 中记录了空串），
+				就不需要任何操作，即：
+					dp[i][j] = dp[i-1][j-1], s[i-1] == s[j-1], i∈[1, len(s1)), j∈[1,len(s2))
+			否则我们需要从以下几种情况中找出最小值，然后其操作次数 +1 ：
+				1、曾：对 s1 的曾相当于对 s2 的减，即 dp[i][j-1]
+				2、删：删除 s1 的一个字符，即 dp[i-1][j]
+				3、改：相当于同时删除 s1、s2 的一个字符，即 dp[i-1][j-1]
+				即：
+					dp[i][j] = min(min(dp[i-1][j], dp[i][j-1]), dp[i-1][j-1]) + 1
+		终止状态：
+			我们需要遍历完两个字符串，所以结果保存在 dp[len(s1)][len(s2)] 中
+		时间复杂度：O(m*n)
+			m、n 分别表示 s1、s2 的长度
+		空间复杂度：0(m*n)
+*/
+func minDistance(word1 string, word2 string) int {
+	m, n := len(word1), len(word2)
+	if m == 0 {
+		return n
+	}
+	if n == 0 {
+		return m
+	}
+	dp := make([][]int, m + 1)
+	// 初始化
+	for i := 0; i <= m; i ++ {
+		dp[i] = make([]int, n + 1)
+		dp[i][0] = i
+	}
+	for j := 1; j <= n; j ++ {
+		dp[0][j] = j
+	}
+	for i := 1; i <= m; i ++ {
+		for j := 1; j <= n; j ++ {
+			if word1[i-1] == word2[j-1] {
+				dp[i][j] = dp[i-1][j-1]
+			} else {
+				dp[i][j] = min(min(dp[i][j-1], dp[i-1][j]), dp[i-1][j-1]) + 1
+			}
+		}
+	}
+	return dp[m][n]
+}
+
+/* 
+	方法二：DP-空间优化
+	思路：
+		由方法一我们可知，对于每一个状态 dp[i][j]，它只与 dp[i][j-1]、dp[i-1][j]、
+		dp[i-1][j-1] 三个前置状态有关，所以我们完全可以只用两个长度为 n 的数组来完成
+		状态转移过程，由此可以将空间复杂度优化到 O(2n)
+		终止状态：
+			我们需要遍历完两个字符串，所以结果保存在 dp[len(s1)][len(s2)] 中
+		时间复杂度：O(m*n)
+			m、n 分别表示 s1、s2 的长度
+		空间复杂度：0(2n)
+*/
+func minDistance2(word1 string, word2 string) int {
+	m, n := len(word1), len(word2)
+	if m == 0 {
+		return n
+	}
+	if n == 0 {
+		return m
+	}
+	dp := make([][]int, 2)
+	for i := 0; i < 2; i ++ {
+		dp[i] = make([]int, n + 1)
+	}
+	cur, pre := 0, 0
+	for i := 0; i <= m; i ++ {
+		cur = i & 1
+		pre = 1 - cur
+		for j := 0; j <= n; j ++ {
+			// 把初始化放到这里
+			if i == 0 {
+				dp[cur][j] = j
+				continue
+			}
+			if j == 0 {
+				dp[cur][j] = i
+				continue
+			}
+			if word1[i-1] == word2[j-1] {
+				dp[cur][j] = dp[pre][j-1]
+			} else {
+				dp[cur][j] = min(min(dp[cur][j-1], dp[pre][j]), dp[pre][j-1]) + 1
+			}
+		}
+	}
+	return dp[cur][n]
+}
 
 // ================== 案列测试 ==================
 
@@ -1581,6 +1964,22 @@ func lengthOfLIS2Test() {
 	fmt.Println(res)
 }
 
+// 12、测试单词拆分
+func wordBreakTest() {
+	s := "leetcode"
+	wordDict := []string{"leet", "code"}
+	res := wordBreak(s, wordDict)
+	fmt.Println(res)
+}
+
+// 13、测试最长公共子序列
+func longestCommonSubsequenceTest() {
+	s1, s2 := "abcde", "ace"
+	// res := longestCommonSubsequence(s1, s2)
+	res := longestCommonSubsequence2(s1, s2)
+	fmt.Println(res)
+}
+
 func main() {
 	// longestConsecutiveTest()
 	// minPathSumTest()
@@ -1591,5 +1990,7 @@ func main() {
 	// jumpTest()
 	// minCutTest()
 	// lengthOfLISTest()
-	lengthOfLIS2Test()
+	// lengthOfLIS2Test()
+	// wordBreakTest()
+	longestCommonSubsequenceTest()
 }
